@@ -1,0 +1,34 @@
+---
+- name: The repo file has been installed
+  get_url:
+    url: "{{ php_rpm_url }}"
+    force: yes
+- name: install remi
+  command: "rpm -Uvh remi-release-7.rpm"
+#package  yum-utils must be installed before this playbook
+- name: enable remi
+  command: "yum-config-manager --enable remi-php{{ php_version }}"
+- name: PHP packages are installed
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ php_packages }}"
+- name: Change php config "disable_functions"
+  lineinfile:
+    dest: "{{ php_config_dest }}"
+    regexp: "^disable_functions ="
+    line: "disable_functions = link, symlink, popen, exec, system, shell_exec, show_source, passthru, pcntl_alarm, pcntl_fork, pcntl_waitpid, pcntl_wait, pcntl_wifexited, pcntl_wifstopped, pcntl_wifsignaled, pcntl_wexitstatus, pcntl_wtermsig, pcntl_wstopsig, pcntl_signal, pcntl_signal_dispatch, pcntl_get_last_error, pcntl_strerror, pcntl_sigprocmask, pcntl_sigwaitinfo, pcntl_sigtimedwait, pcntl_exec, pcntl_getpriority,  pcntl_setpriority, phpinfo, passthru, proc_open, parse_ini_file, allow_url_fopen"
+    
+- name: Change php config "short_open_tag"
+  lineinfile:
+    dest: "{{ php_config_dest }}"
+    regexp: "^short_open_tag = Off"
+    line: "short_open_tag = On"
+  notify:
+     - Restart httpd service
+- name: list installed php packages
+  command: "yum list installed | grep php"
+  register: command_result
+- name: Print installed php packages
+  debug:
+    var: command_result.stdout

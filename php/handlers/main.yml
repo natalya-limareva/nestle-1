@@ -1,0 +1,7 @@
+---
+# handlers file for php
+- name: Restart httpd service
+  service:
+    name: "{{ httpd_service }}"
+    enabled: true
+    state: restarted

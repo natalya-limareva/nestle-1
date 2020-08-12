@@ -1,0 +1,80 @@
+upstream {{ webserver_name }}-ssl {
+    least_conn;
+    server {{ webserver_ip }}:443;
+}
+
+#server {
+#    include /etc/nginx/conf.d/errorglobal;
+#
+#    listen 192.168.4.42:443 ssl;
+#
+#    server_name promo.{{ url }};
+#    server_name prod.{{ url }};
+#    server_name www.{{ url }};
+#    server_name {{ url }};
+#       
+#    ssl_certificate         ssl/prod.{{ url }}.crt;
+#    ssl_certificate_key     ssl/prod.{{ url }}.key;
+#
+#    location / {
+#    proxy_pass https://{{ webserver_name }}-ssl;
+#    }
+#}
+
+
+upstream {{ webserver_name }} {
+    least_conn;
+    server {{ webserver_ip }};
+}
+
+server {
+    include /etc/nginx/conf.d/errorglobal;
+
+    listen 192.168.4.42:80;
+    server_name promo.{{ url }};
+    server_name prod.{{ url }};
+    server_name www.{{ url }};
+    server_name {{ url }};
+
+    location / {
+        proxy_pass http://{{ webserver_name }};
+    }
+}
+
+upstream {{ webserver_name }}-ssl {
+    least_conn;
+    server {{ webserver_ip }}:443;
+}
+    
+#server {
+#    include /etc/nginx/conf.d/errorglobal;
+#
+#    listen 192.168.4.42:443 ssl;
+#
+#    server_name stag.{{ url }};
+#
+#    ssl_certificate         ssl/stag.{{ url }}.crt;
+#    ssl_certificate_key     ssl/stag.{{ url }}.key;
+#    location / {
+#        proxy_pass https://{{ webserver_name }}-ssl;
+#    }
+#}
+
+
+upstream {{ webserver_name }} {
+    least_conn;
+    server {{ webserver_ip }};
+}
+
+server {
+    include /etc/nginx/conf.d/errorglobal;
+
+    listen 192.168.4.42:80;
+        
+    server_name stag.{{ url }};
+
+    location / {
+        proxy_pass http://{{ webserver_name }};
+    }
+}
+

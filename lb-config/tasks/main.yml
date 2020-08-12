@@ -1,0 +1,28 @@
+---
+
+- template:
+    src: template-prod.conf.j2
+    dest: "/etc/nginx/conf.d/{{ url }}-prod.conf"
+    force: no
+  when: webserver_name | regex_search(".*-pd$")
+
+- template:
+    src: template-stag.conf.j2
+    dest: "/etc/nginx/conf.d/{{ url }}-stag.conf"
+    force: no
+  when: webserver_name | regex_search(".*-(sg|pp)$")
+
+- name: Test LB config
+  command: nginx -t
+  when: ansible_facts.services.nginx.state == 'running'
+  register: nginx_configtest
+- name: Nginx configtest
+  debug:
+    var: nginx_configtest.stdout
+
+- name: Reload nginx
+  command: /etc/init.d/nginx reload
+  when: ansible_facts.services.nginx.state == 'running' and nginx_configtest.stderr_lines[0] is match(".*syntax is ok") and nginx_configtest.stderr_lines[1] is match(".*test is successful$") 
+
+
+

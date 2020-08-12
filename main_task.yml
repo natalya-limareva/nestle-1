@@ -1,0 +1,43 @@
+---
+- name: PHP, s3cmd 
+  hosts: web-server
+  become: true
+  vars_files:
+    - ".vars.yml"
+  roles:
+    - php 
+# s3cmd - s3cmd + restorecon
+    - s3cmd
+
+---
+- name: Create DB
+  hosts: db-server
+  become: true
+  vars_files:
+    - ".vars.yml"
+  roles:
+    - database
+
+---
+- name: LB
+  hosts: lb-server
+  become: true
+  vars_files:
+    - ".vars.yml"
+  roles:
+    - lb-config
+
+
+#DONE:
+#    - ssd_config +++ (memberOf=CN={{ webserver_name }},OU=Website Groups,OU=NESTLERU,OU=Web Developers,DC=NESTCROC,DC=INT)
+
+#TODO:
+#    - ad_group https://www.ekzorchik.ru/2019/05/we-manage-through-ansible-domain-windows-systems/
+#    - avamar_groups ???
+#    - proxysql просто немного подправить???
+# отдельный таск на логи на удаленный сервер и тд
+#    - отдельно: выдача прав на базу - создание юзера если его нет и выдача прав
+# снятие дампа базы и выкладывание дампа на s3
+#восстановление из дампа базы
+
+

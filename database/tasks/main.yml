@@ -1,0 +1,41 @@
+---
+- name: Create a new database with name 'bobdata'
+  mysql_db:
+    login_user: "{{ root_user }}"
+    login_password: "{{ root_password }}"
+    name: "{{ db_name }}"
+    state: present
+
+- name: Create database user with name 'bob' and password '12345' with all database privileges
+  mysql_user:
+    login_user: "{{ root_user }}"
+    login_password: "{{ root_password }}"
+    name: "dbuser_{{ db_name }}"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    host: "{{ webserver_ip }}"
+
+- name: Setting up the ssl cert directory and config files
+  block:
+    - name: grant privileges for list of user
+      mysql_user:
+        name: "{{ item }}"
+        append_privs: yes
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+#      loop: "{{ list_of_user }}"
+  rescue:
+    - name: Error
+      debug:
+        msg: >
+          "User does not exist."
+    - name: Create user
+      command: mysql -uroot -pDW3XsizhvaGz4Cu "-e CREATE USER '{{ item }}'@'%' IDENTIFIED VIA pam USING 'mariadb';"
+    - name: grant privileges for list of user
+      mysql_user:
+        name: "{{ item }}"
+        append_privs: yes
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+  loop: "{{ list_of_user }}"

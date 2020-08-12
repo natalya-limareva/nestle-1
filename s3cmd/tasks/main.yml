@@ -1,0 +1,12 @@
+---
+- name: s3cmd install
+  yum:
+    name: "{{ s3cmd_package }}"
+    state: present
+
+- name: copy config file
+  copy:
+    src: .s3cfg
+    dest: /root/.s3cfg
+- name: restorecon /var/www/html
+  command: restorecon -RvF /var/www/html/ 
